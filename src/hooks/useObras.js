@@ -8,7 +8,7 @@ export function useObras(consulta) {
   // Cada pulsación de «Reintentar» suma 1 y obliga a repetir la petición con la misma consulta
   const [intento, setIntento] = useState(0)
   // Última respuesta recibida, marcada con la búsqueda a la que pertenece
-  const [respuesta, setRespuesta] = useState(null) // { clave, obras, desdeCache, error }
+  const [respuesta, setRespuesta] = useState(null) // { clave, obras, error }
 
   const clave = `${consulta}#${intento}`
 
