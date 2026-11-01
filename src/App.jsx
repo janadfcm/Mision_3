@@ -55,7 +55,7 @@ function App() {
               <Filtros opciones={opcionesDeFiltro(obras)} filtros={filtros} alCambiar={setFiltros} />
             )}
             <EstadoBusqueda estado={estadoVista} consulta={consulta} error={error} alReintentar={reintentar} />
-            {visibles.length > 0 && (
+            {estadoVista === 'ok' && (
               <>
                 <Estadisticas titulo="Estas obras en cifras" obras={visibles} />
                 <Galeria
