@@ -17,7 +17,7 @@ function App() {
   const [filtros, setFiltros] = useState(SIN_FILTROS)
   const [vista, setVista] = useState('busqueda') // 'busqueda' | 'sala'
   const [sala, setSala] = useLocalStorage('museo-de-bolsillo:sala', [])
-  const { estado, obras, desdeCache, error, reintentar } = useObras(consulta)
+  const { estado, obras, error, reintentar } = useObras(consulta)
 
   // Valores derivados: se recalculan en cada render, nunca se guardan en otro useState
   const visibles = filtrarObras(obras, filtros)
@@ -60,7 +60,7 @@ function App() {
                 <Estadisticas titulo="Estas obras en cifras" obras={visibles} />
                 <Galeria
                   obras={visibles}
-                  resumen={`Mostrando ${visibles.length} de ${obras.length} obras${desdeCache ? ' · desde la caché' : ''}`}
+                  resumen={`Mostrando ${visibles.length} de ${obras.length} obras`}
                   idsSala={idsSala}
                   alAlternarSala={alternarSala}
                 />
