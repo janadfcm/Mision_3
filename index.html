@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- La API del museo responde 403 (sin CORS) si el Referer es localhost: no lo enviamos -->
+    <meta name="referrer" content="no-referrer" />
     <title>Museo de bolsillo</title>
   </head>
   <body>
