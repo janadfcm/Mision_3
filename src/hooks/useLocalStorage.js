@@ -34,7 +34,7 @@ export function useLocalStorage(clave, valorInicial) {
     }
     window.addEventListener('storage', alCambiarEnOtraPestana)
     return () => window.removeEventListener('storage', alCambiarEnOtraPestana) // cleanup
-    // valorInicial suele ser un literal ([]) nuevo en cada render: no lo ponemos para no resuscribir siempre
+    // valorInicial suele ser un literal ([]) nuevo en cada render: no lo ponemos para no volver a suscribirnos en cada render
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clave])
 
