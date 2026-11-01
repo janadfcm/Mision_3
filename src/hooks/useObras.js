@@ -5,11 +5,12 @@ import { buscarObras } from '../lib/api.js'
 import { prepararObras } from '../lib/datos.js'
 
 export function useObras(consulta) {
-  const [obras, setObras] = useState([])
-  const [error, setError] = useState(null)
-  const [cargando, setCargando] = useState(false)
-  // Cada pulsación de «Reintentar» suma 1: cambia una dependencia y el efecto se repite
+  // Cada pulsación de «Reintentar» suma 1 y obliga a repetir la petición con la misma consulta
   const [intento, setIntento] = useState(0)
+  // Última respuesta recibida, marcada con la búsqueda a la que pertenece
+  const [respuesta, setRespuesta] = useState(null) // { clave, obras, desdeCache, error }
+
+  const clave = `${consulta}#${intento}`
 
   useEffect(() => {
     if (consulta === '') return
@@ -17,31 +18,35 @@ export function useObras(consulta) {
     // Si la consulta cambia antes de que llegue la respuesta, el cleanup aborta la petición vieja:
     // así nunca pinta una respuesta antigua encima de la nueva (en la M2 lo hacía el contador ultimaBusqueda)
     const controlador = new AbortController()
-    setObras([])
-    setError(null)
-    setCargando(true)
 
-    buscarObras(consulta, controlador.signal)
-      .then((obrasApi) => setObras(prepararObras(obrasApi)))
-      .catch((error) => {
+    async function cargar() {
+      try {
+        const obrasApi = await buscarObras(consulta, controlador.signal)
+        setRespuesta({ clave, obras: prepararObras(obrasApi), error: null })
+      } catch (error) {
         if (error.name === 'AbortError') return // la cancelamos nosotros: no es un error
-        setError(error.message)
-      })
-      .finally(() => {
-        // Si se abortó, ya hay otra petición en marcha que es la que manda
-        if (!controlador.signal.aborted) setCargando(false)
-      })
+        setRespuesta({ clave, obras: [], error: error.message })
+      }
+    }
 
+    cargar()
     return () => controlador.abort()
-  }, [consulta, intento])
+  }, [consulta, clave])
 
-  // El estado de la búsqueda se deriva de los tres valores anteriores; no es otro useState
+  // Todo lo demás se deriva: si la respuesta guardada no es de la búsqueda actual, aún está cargando
+  const vigente = respuesta?.clave === clave ? respuesta : null
+
   let estado
   if (consulta === '') estado = 'inactivo'
-  else if (cargando) estado = 'cargando'
-  else if (error !== null) estado = 'error'
-  else if (obras.length === 0) estado = 'vacio'
+  else if (vigente === null) estado = 'cargando'
+  else if (vigente.error !== null) estado = 'error'
+  else if (vigente.obras.length === 0) estado = 'vacio'
   else estado = 'ok'
 
-  return { estado, obras, error, reintentar: () => setIntento((n) => n + 1) }
+  return {
+    estado,
+    obras: vigente?.obras ?? [],
+    error: vigente?.error ?? null,
+    reintentar: () => setIntento((n) => n + 1),
+  }
 }
